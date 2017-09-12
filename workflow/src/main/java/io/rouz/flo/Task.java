@@ -31,6 +31,8 @@ public abstract class Task<T> implements Serializable {
 
   public abstract List<OpProvider<?>> ops();
 
+  public abstract List<OpProviderStrict<?, T>> strictOps();
+
   public List<Task<?>> inputs() {
     return lazyInputs().get();
   }
@@ -55,7 +57,7 @@ public abstract class Task<T> implements Serializable {
 
   public static <T> Task<T> create(Fn<T> code, Class<T> type, String taskName, Object... args) {
     return create(
-        Collections::emptyList, Collections.emptyList(),
+        Collections::emptyList, Collections.emptyList(), Collections.emptyList(),
         type,
         tc -> tc.value(code),
         TaskId.create(taskName, args));
@@ -64,10 +66,11 @@ public abstract class Task<T> implements Serializable {
   static <T> Task<T> create(
       Fn<List<Task<?>>> inputs,
       List<OpProvider<?>> ops,
+      List<OpProviderStrict<?, T>> strictOps,
       Class<T> type,
       EvalClosure<T> code,
       TaskId taskId) {
-    return new AutoValue_Task<>(taskId, type, code, inputs, ops);
+    return new AutoValue_Task<>(taskId, type, code, inputs, ops, strictOps);
   }
 
   /**
